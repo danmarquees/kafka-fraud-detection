@@ -4,32 +4,32 @@ import java.math.BigDecimal;
 
 public class Transaction {
 
-    private String transactionID;
-    private String userID;
+    private String transactionId;
+    private String userId;
     private BigDecimal amount;
     private long timestamp;
 
-    //Construttores, getters, setters e toString()
+    // Construtores, getters, setters e toString()
     public Transaction() {}
 
     public Transaction(
-        String transactionID,
-        String userID,
+        String transactionId,
+        String userId,
         BigDecimal amount,
         long timestamp
     ) {
-        this.transactionID = transactionID;
-        this.userID = userID;
+        this.transactionId = transactionId;
+        this.userId = userId;
         this.amount = amount;
         this.timestamp = timestamp;
     }
 
     public String getTransactionId() {
-        return transactionID;
+        return transactionId;
     }
 
-    public String getUserID() {
-        return userID;
+    public String getUserId() {
+        return userId;
     }
 
     public BigDecimal getAmount() {
@@ -44,16 +44,17 @@ public class Transaction {
     public String toString() {
         return (
             "Transaction{" +
-            "transactionID='" +
-            transactionID +
+            "transactionId='" +
+            transactionId +
             '\'' +
-            ", userID='" +
-            userID +
+            ", userId='" +
+            userId +
             '\'' +
             ", amount=" +
             amount +
             ", timestamp=" +
             timestamp +
-        '}';
+            '}'
+        );
     }
 }

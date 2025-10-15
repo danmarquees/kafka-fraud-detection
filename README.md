@@ -41,3 +41,11 @@ Este serviço Java tem a função de simular um fluxo contínuo de eventos de tr
 
 -   **Geração de Dados:** Cria transações com dados aleatórios (ID de usuário, valor, etc.) em intervalos regulares de tempo.
 -   **Publicação no Kafka:** Envia cada transação gerada para o tópico `transactions`. O ID do usuário (`userId`) é usado como a chave da mensagem, o que garante que todas as transações de um mesmo usuário sejam processadas pelo mesmo consumidor, mantendo a ordem.
+
+### Módulo `fraud-detector`
+
+Este é o serviço principal do sistema, responsável por analisar o fluxo de transações e identificar atividades suspeitas.
+
+-   **Consumidor Kafka:** Se inscreve no tópico `transactions` para receber os eventos em tempo real.
+-   **Desserialização:** Utiliza um `GsonDeserializer` customizado para converter a mensagem JSON de volta para um objeto Java `Transaction`.
+-   **Lógica de Fraude:** (A ser implementada) Analisará os padrões de transação para detectar fraudes.
