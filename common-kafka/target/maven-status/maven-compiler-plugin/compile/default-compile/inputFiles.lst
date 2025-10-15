@@ -1,2 +1,3 @@
+/home/danmarques/Documentos/Workplace/kafka-fraud-detection/common-kafka/src/main/java/com/example/common/kafka/GsonDeserializer.java
 /home/danmarques/Documentos/Workplace/kafka-fraud-detection/common-kafka/src/main/java/com/example/common/kafka/GsonSerializer.java
 /home/danmarques/Documentos/Workplace/kafka-fraud-detection/common-kafka/src/main/java/com/example/common/kafka/Transaction.java
