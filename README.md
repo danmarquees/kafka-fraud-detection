@@ -34,3 +34,10 @@ Este módulo é fundamental para a coesão do projeto. Ele contém:
 
 -   **Modelos de Dados:** Classes POJO (Plain Old Java Objects) que representam os eventos trafegados no Kafka, como a classe `Transaction`.
 -   **Serializadores e Desserializadores Customizados:** Implementações para converter objetos Java em JSON (e vice-versa) para que possam ser enviados e recebidos pelo Kafka. Isso garante que o produtor e o consumidor compartilhem o mesmo schema de mensagem.
+
+### Módulo `kafka-producer`
+
+Este serviço Java tem a função de simular um fluxo contínuo de eventos de transações financeiras.
+
+-   **Geração de Dados:** Cria transações com dados aleatórios (ID de usuário, valor, etc.) em intervalos regulares de tempo.
+-   **Publicação no Kafka:** Envia cada transação gerada para o tópico `transactions`. O ID do usuário (`userId`) é usado como a chave da mensagem, o que garante que todas as transações de um mesmo usuário sejam processadas pelo mesmo consumidor, mantendo a ordem.
