@@ -9,8 +9,14 @@
         <version>1.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>fraud-detector</artifactId>
+    <artifactId>fraud-detector-streams</artifactId>
+
     <dependencies>
+        <dependency>
+            <groupId>org.apache.kafka</groupId>
+            <artifactId>kafka-streams</artifactId>
+            <version>3.1.0</version>
+        </dependency>
         <dependency>
             <groupId>com.example</groupId>
             <artifactId>common-kafka</artifactId>

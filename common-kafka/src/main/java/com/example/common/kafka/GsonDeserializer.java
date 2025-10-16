@@ -11,16 +11,23 @@ public class GsonDeserializer<T> implements Deserializer<T> {
     private final Gson gson = new GsonBuilder().create();
     private Class<T> type;
 
+    // Novo construtor para o Kafka Streams
+    public GsonDeserializer(Class<T> type) {
+        this.type = type;
+    }
+
     @Override
     public void configure(Map<String, ?> configs, boolean isKey) {
-        String typeName = String.valueOf(configs.get(TYPE_CONFIG));
-        try {
-            this.type = (Class<T>) Class.forName(typeName);
-        } catch (ClassNotFoundException e) {
-            throw new RuntimeException(
-                "Type for deserialization not found: " + typeName,
-                e
-            );
+        if (type == null) {
+            String typeName = String.valueOf(configs.get(TYPE_CONFIG));
+            try {
+                this.type = (Class<T>) Class.forName(typeName);
+            } catch (ClassNotFoundException e) {
+                throw new RuntimeException(
+                    "Type for deserialization not found: " + typeName,
+                    e
+                );
+            }
         }
     }
 

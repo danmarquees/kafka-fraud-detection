@@ -50,3 +50,16 @@ Este é o serviço principal do sistema, responsável por analisar o fluxo de tr
 -   **Desserialização:** Utiliza um `GsonDeserializer` customizado para converter a mensagem JSON de volta para um objeto Java `Transaction`.
 -   **Lógica de Fraude (Stateful):** Implementa uma regra de detecção baseada em janela de tempo. O serviço mantém um estado em memória que rastreia o número de transações por usuário. Se um usuário excede um limite de transações (ex: > 2) em um curto período (ex: 10 segundos), um alerta de fraude é gerado.
 -   **Produtor de Alertas:** Ao detectar uma fraude, o serviço publica a transação fraudulenta em um tópico dedicado, `fraud_alerts`. Isso desacopla a detecção da ação, permitindo que outros serviços (sistemas de notificação, dashboards, etc.) consumam esses alertas de forma independente.
+
+## Arquitetura com Kafka Streams (`fraud-detector-streams`)
+
+Para uma solução mais robusta e escalável, foi desenvolvido um novo serviço de detecção de fraudes utilizando a biblioteca Kafka Streams. Esta abordagem substitui o gerenciamento de estado manual por uma API de processamento de stream declarativa e tolerante a falhas.
+
+-   **Topologia de Stream:** O serviço define uma topologia que:
+    1.  Consome o stream de transações do tópico `transactions`.
+    2.  Agrupa as transações pela chave (`userId`).
+    3.  Aplica uma janela de tempo de 10 segundos.
+    4.  Conta o número de transações para cada usuário dentro dessa janela.
+    5.  Filtra os resultados para identificar usuários que excederam o limite de transações.
+    6.  Publica os `userIds` fraudulentos no tópico `fraud_alerts`.
+-   **Vantagens:** Gerenciamento de estado, tolerância a falhas e escalabilidade são gerenciados nativamente pela biblioteca, resultando em um código mais limpo e uma arquitetura mais resiliente.
