@@ -49,3 +49,4 @@ Este é o serviço principal do sistema, responsável por analisar o fluxo de tr
 -   **Consumidor Kafka:** Se inscreve no tópico `transactions` para receber os eventos em tempo real.
 -   **Desserialização:** Utiliza um `GsonDeserializer` customizado para converter a mensagem JSON de volta para um objeto Java `Transaction`.
 -   **Lógica de Fraude (Stateful):** Implementa uma regra de detecção baseada em janela de tempo. O serviço mantém um estado em memória que rastreia o número de transações por usuário. Se um usuário excede um limite de transações (ex: > 2) em um curto período (ex: 10 segundos), um alerta de fraude é gerado.
+-   **Produtor de Alertas:** Ao detectar uma fraude, o serviço publica a transação fraudulenta em um tópico dedicado, `fraud_alerts`. Isso desacopla a detecção da ação, permitindo que outros serviços (sistemas de notificação, dashboards, etc.) consumam esses alertas de forma independente.
