@@ -1,0 +1,4 @@
+com/example/persistence/FraudulentTransaction.class
+com/example/persistence/PersistenceServiceApplication.class
+com/example/persistence/FraudAlertConsumer.class
+com/example/persistence/FraudRepository.class

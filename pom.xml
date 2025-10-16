@@ -15,6 +15,7 @@
         <module>common-kafka</module>
         <module>fraud-detector-streams</module>
         <module>notification-service</module>
+        <module>persistence-service</module>
     </modules>
 
     <properties>

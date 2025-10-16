@@ -6,6 +6,7 @@ services:
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_TICK_TIME: 2000
+
   kafka:
     image: confluentinc/cp-kafka:7.0.1
     container_name: kafka
@@ -13,11 +14,33 @@ services:
       - zookeeper
     ports:
       - "9092:9092"
-
     environment:
-      KAFKA_ZOOKEEPER_ID: 1
+      KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: "zookeeper:2181"
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092, PLAINTEXT_HOST://localhost:9092
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+
+  # --- NOVOS SERVIÇOS ADICIONADOS ABAIXO ---
+
+  postgres-db:
+    image: postgres:14.1
+    container_name: postgres-db
+    ports:
+      - "5432:5432" # Expõe a porta do PostgreSQL para a sua máquina
+    environment:
+      POSTGRES_USER: frauduser # Usuário do banco de dados
+      POSTGRES_PASSWORD: fraudpass # Senha do banco de dados
+      POSTGRES_DB: fraud_detection_db # Nome do banco de dados
+    volumes:
+      - postgres_data:/var/lib/postgresql/data # Garante que os dados persistam
+
+  adminer:
+    image: adminer
+    container_name: adminer
+    ports:
+      - "8080:8080" # Expõe a porta do Adminer
+
+volumes:
+  postgres_data: # Define o volume para persistência do PostgreSQL

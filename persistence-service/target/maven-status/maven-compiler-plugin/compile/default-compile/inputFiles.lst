@@ -1,0 +1,4 @@
+/home/danmarques/Documentos/Workplace/kafka-fraud-detection/persistence-service/src/main/java/com/example/persistence/FraudAlertConsumer.java
+/home/danmarques/Documentos/Workplace/kafka-fraud-detection/persistence-service/src/main/java/com/example/persistence/FraudRepository.java
+/home/danmarques/Documentos/Workplace/kafka-fraud-detection/persistence-service/src/main/java/com/example/persistence/FraudulentTransaction.java
+/home/danmarques/Documentos/Workplace/kafka-fraud-detection/persistence-service/src/main/java/com/example/persistence/PersistenceServiceApplication.java
