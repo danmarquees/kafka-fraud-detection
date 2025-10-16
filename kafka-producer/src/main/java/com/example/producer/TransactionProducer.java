@@ -20,7 +20,7 @@ public class TransactionProducer {
     public static void main(String[] args) {
         Properties props = new Properties();
         // Endereço do nosso broker Kafka iniciado via Docker Compose
-        props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9021");
+        props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
         // Serializador da chave (String)
         props.put(
             ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG,
