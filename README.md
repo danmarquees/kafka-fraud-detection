@@ -1,7 +1,3 @@
-Com certeza\! Aqui está o `README.md` completo e atualizado do projeto, formatado em Markdown, que reflete todas as etapas que construímos, desde a produção de transações até a persistência no banco de dados e a interface de usuário em tempo real.
-
------
-
 # Sistema de Detecção de Fraudes em Tempo Real com Kafka e Java
 
 Este projeto implementa um sistema de baixa latência para a detecção de fraudes em transações financeiras. Utilizando uma arquitetura de microsserviços orientada a eventos com Apache Kafka, o sistema processa um fluxo contínuo de transações, identifica atividades fraudulentas usando o Kafka Streams, notifica um dashboard em tempo real via WebSockets e persiste os alertas em um banco de dados PostgreSQL.
