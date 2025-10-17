@@ -1,65 +1,117 @@
-# Sistema de detecção de fraudes em tempo real com Kafka e Java
+Com certeza\! Aqui está o `README.md` completo e atualizado do projeto, formatado em Markdown, que reflete todas as etapas que construímos, desde a produção de transações até a persistência no banco de dados e a interface de usuário em tempo real.
 
-  [span_0](start_span)[span_1](start_span) Este projeto implementa um sistema de baixa latência para a detecção de fraudes em transações financeiras, utilizando uma arquitetura orientada a eventos com Apache Kafka [span_0](end_span)[span_1](end_span). [span_2](start_span)O sistema analisa um fluxo contínuo de transações para dentificar padrões fraudulentos em tempo real.[span_2](end_span).
+-----
 
-## 1. Configuração do Ambiente
+# Sistema de Detecção de Fraudes em Tempo Real com Kafka e Java
 
-A infraestrutura do Apache Kafka é gerenciada via Docker Compose para simplificar a configuração do ambiente de desenvolvimento.
+Este projeto implementa um sistema de baixa latência para a detecção de fraudes em transações financeiras. Utilizando uma arquitetura de microsserviços orientada a eventos com Apache Kafka, o sistema processa um fluxo contínuo de transações, identifica atividades fraudulentas usando o Kafka Streams, notifica um dashboard em tempo real via WebSockets e persiste os alertas em um banco de dados PostgreSQL.
 
-### Pré-requisitos
-- Java JDK 17+
-- Docker e Docker Compose
-- Apache Maven 3.8+
+## Arquitetura do Sistema
 
-### Inicializção do Kafka
-Para iniciar os serviços do Kafka e Zookeeper, execute o seguinte comando na raiz do projeto:
+O fluxo de dados segue a seguinte arquitetura:
+
+1.  **`kafka-producer`**: Simula transações financeiras e as publica no tópico `transactions`.
+2.  **`fraud-detector-streams`**: Consome o tópico `transactions`, aplica uma lógica de detecção de fraude com estado (janelas de tempo) e, ao encontrar uma fraude, publica um alerta no tópico `fraud_alerts`.
+3.  **Tópico `fraud_alerts` (Fan-Out)**: Atua como um ponto central para distribuir os alertas para múltiplos serviços.
+      * **`persistence-service`**: Consome os alertas e os salva no banco de dados **PostgreSQL** para auditoria e análise.
+      * **`notification-service`**: Consome os alertas e os envia via **WebSocket** para o dashboard web.
+4.  **Interface (Dashboard)**: Uma página web simples que se conecta ao `notification-service` e exibe os alertas de fraude assim que eles ocorrem.
+5.  **Infraestrutura Docker**: Todos os serviços de backend (Kafka, Zookeeper, PostgreSQL, Adminer) são gerenciados via `docker-compose.yml`.
+
+## Módulos do Projeto
+
+O projeto é organizado em um modelo Maven multi-módulo:
+
+  * **`common-kafka`**: Biblioteca compartilhada contendo o modelo de dados (`Transaction.java`) e os serializadores/desserializadores customizados (Gson).
+  * **`kafka-producer`**: Serviço Java que simula e publica eventos de transação no tópico `transactions`.
+  * **`fraud-detector-streams`**: Serviço de processamento de stream que utiliza a biblioteca **Kafka Streams** para aplicar a lógica de detecção de fraude. Ele agrupa transações por usuário em janelas de 10 segundos e filtra usuários que excedem 2 transações.
+  * **`notification-service`**: Um microsserviço Spring Boot que consome do tópico `fraud_alerts` e retransmite os alertas para a interface do usuário via WebSocket.
+  * **`persistence-service`**: Um microsserviço Spring Boot com Spring Data JPA que consome do tópico `fraud_alerts` e persiste os dados da transação fraudulenta em um banco de dados PostgreSQL.
+
+## Tecnologias Utilizadas
+
+  * **Linguagem:** Java 17
+  * **Mensageria/Stream:** Apache Kafka
+  * **Processamento de Stream:** Kafka Streams
+  * **Backend:** Spring Boot (para os serviços de notificação e persistência)
+  * **Banco de Dados:** PostgreSQL
+  * **Comunicação Real-time (UI):** WebSockets (via STOMP)
+  * **Frontend:** HTML, CSS (Bootstrap), JavaScript (SockJS, StompJS)
+  * **Containerização:** Docker e Docker Compose
+  * **Build:** Apache Maven
+
+## Pré-requisitos
+
+Para executar este projeto, você precisará ter instalados:
+
+  * Java JDK 17+
+  * Apache Maven 3.8+
+  * Docker
+  * Docker Compose
+
+## Como Executar o Projeto
+
+Siga os passos abaixo para iniciar o sistema completo.
+
+### 1\. Iniciar a Infraestrutura de Backend
+
+Inicie todos os contêineres Docker (Kafka, Zookeeper, PostgreSQL e Adminer). Execute este comando na raiz do projeto:
 
 ```bash
 docker-compose up -d
 ```
 
-[cite_start]Este comando irá iniciar os contâineres necessários em modo "detached (segundo plano)"[cite:61,62].
+### 2\. Compilar todo o Projeto
 
-## 2. Estrutura do projeto
+Compile todos os módulos Maven para garantir que todas as dependências estejam resolvidas e as classes construídas.
 
-O projeto está organizado em um modelo Maven multi-módulo para garantir a separação de responsabilidades e o reuso de código.
+```bash
+mvn clean install
+```
 
-- **'kafka-producer'**: Um serviço simples responsável por simular e enviar eventos de transação para o tópico Kafka.
-- **'fraud-detector'**: O serviço principal que consome os eventos de transação, aplica a lógica de detecção de fraude em tempo real e emite alertas.
-- **'common-kafka'**: Uma biblioteca compartilhada que contém código comum, com serializadores, desserializadores e modelos de dados utilizados tanto pelo produtor quanto pelo consumidor.
+### 3\. Iniciar os Microsserviços
 
-### Módulo `common-kafka`
+Abra **quatro terminais separados** na raiz do projeto e execute um serviço em cada um. A ordem de inicialização é importante.
 
-Este módulo é fundamental para a coesão do projeto. Ele contém:
+**Terminal 1: Serviço de Persistência**
 
--   **Modelos de Dados:** Classes POJO (Plain Old Java Objects) que representam os eventos trafegados no Kafka, como a classe `Transaction`.
--   **Serializadores e Desserializadores Customizados:** Implementações para converter objetos Java em JSON (e vice-versa) para que possam ser enviados e recebidos pelo Kafka. Isso garante que o produtor e o consumidor compartilhem o mesmo schema de mensagem.
+```bash
+mvn exec:java -pl persistence-service -Dexec.mainClass="com.example.persistence.PersistenceServiceApplication"
+```
 
-### Módulo `kafka-producer`
+**Terminal 2: Serviço de Notificação (Dashboard)**
 
-Este serviço Java tem a função de simular um fluxo contínuo de eventos de transações financeiras.
+```bash
+mvn exec:java -pl notification-service -Dexec.mainClass="com.example.notification.NotificationServiceApplication"
+```
 
--   **Geração de Dados:** Cria transações com dados aleatórios (ID de usuário, valor, etc.) em intervalos regulares de tempo.
--   **Publicação no Kafka:** Envia cada transação gerada para o tópico `transactions`. O ID do usuário (`userId`) é usado como a chave da mensagem, o que garante que todas as transações de um mesmo usuário sejam processadas pelo mesmo consumidor, mantendo a ordem.
+**Terminal 3: Detector de Fraudes (Kafka Streams)**
 
-### Módulo `fraud-detector`
+```bash
+mvn exec:java -pl fraud-detector-streams -Dexec.mainClass="com.example.streams.FraudDetectorStreamsApp"
+```
 
-Este é o serviço principal do sistema, responsável por analisar o fluxo de transações e identificar atividades suspeitas.
+**Terminal 4: Produtor de Transações (Inicie por último)**
+*Aguarde os outros serviços iniciarem antes de rodar este.*
 
--   **Consumidor Kafka:** Se inscreve no tópico `transactions` para receber os eventos em tempo real.
--   **Desserialização:** Utiliza um `GsonDeserializer` customizado para converter a mensagem JSON de volta para um objeto Java `Transaction`.
--   **Lógica de Fraude (Stateful):** Implementa uma regra de detecção baseada em janela de tempo. O serviço mantém um estado em memória que rastreia o número de transações por usuário. Se um usuário excede um limite de transações (ex: > 2) em um curto período (ex: 10 segundos), um alerta de fraude é gerado.
--   **Produtor de Alertas:** Ao detectar uma fraude, o serviço publica a transação fraudulenta em um tópico dedicado, `fraud_alerts`. Isso desacopla a detecção da ação, permitindo que outros serviços (sistemas de notificação, dashboards, etc.) consumam esses alertas de forma independente.
+```bash
+mvn exec:java -pl kafka-producer -Dexec.mainClass="com.example.producer.TransactionProducer"
+```
 
-## Arquitetura com Kafka Streams (`fraud-detector-streams`)
+### 4\. Acessar os Dashboards
 
-Para uma solução mais robusta e escalável, foi desenvolvido um novo serviço de detecção de fraudes utilizando a biblioteca Kafka Streams. Esta abordagem substitui o gerenciamento de estado manual por uma API de processamento de stream declarativa e tolerante a falhas.
+Com tudo rodando, você pode monitorar o sistema:
 
--   **Topologia de Stream:** O serviço define uma topologia que:
-    1.  Consome o stream de transações do tópico `transactions`.
-    2.  Agrupa as transações pela chave (`userId`).
-    3.  Aplica uma janela de tempo de 10 segundos.
-    4.  Conta o número de transações para cada usuário dentro dessa janela.
-    5.  Filtra os resultados para identificar usuários que excederam o limite de transações.
-    6.  Publica os `userIds` fraudulentos no tópico `fraud_alerts`.
--   **Vantagens:** Gerenciamento de estado, tolerância a falhas e escalabilidade são gerenciados nativamente pela biblioteca, resultando em um código mais limpo e uma arquitetura mais resiliente.
+  * **Dashboard de Fraudes:** Abra seu navegador e acesse **`http://localhost:8081`**.
+
+      * A página exibirá os alertas de fraude em tempo real assim que o `kafka-producer` os gerar e o `fraud-detector-streams` os processar.
+
+  * **Adminer (Gerenciador do Banco de Dados):** Acesse **`http://localhost:8080`**.
+
+      * Use as seguintes credenciais para logar:
+          * **Sistema:** `PostgreSQL`
+          * **Servidor:** `postgres-db`
+          * **Usuário:** `frauduser`
+          * **Senha:** `fraudpass`
+          * **Base de dados:** `fraud_detection_db`
+      * Ao clicar na tabela `fraudulent_transaction`, você verá o histórico de todas as fraudes que foram persistidas.
